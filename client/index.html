@@ -4,8 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RSA</title>
+  <style>
+    html, body {
+      height: 100%
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .form {
+      background-color: aliceblue;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+    input {
+      margin: 10px;
+    }
+  </style>
 </head>
 <body>
+  <div class="form">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name">
+    <label for="password">Password:</label>
+    <input type="text" name="password" id="password">
+    <input type="submit" value="Submit">
+  </div>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="script.js"></script>
 </body>
