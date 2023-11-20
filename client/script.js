@@ -1,4 +1,4 @@
-axios.get('http://127.0.0.1:5000/')
+axios.get('http://127.0.0.1:5000/publicKey')
   .then(res => console.log(res.data));
 
 function sendData(e) {

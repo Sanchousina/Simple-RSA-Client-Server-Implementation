@@ -1,12 +1,27 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import rsa
+
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")
-def home():
-  return jsonify({'data': 'Home'})
+n = 0
+e = 0
+d = 0
+
+@app.route("/publicKey")
+def generateKeys():
+  (pubkey, privkey) = rsa.newkeys(512)
+  n = pubkey.n
+  e = pubkey.e
+  d = privkey.d
+  print(pubkey.n)
+ 
+  return jsonify({
+    "publicKeyN": str(pubkey.n),
+    "publicKeyE" : str(e)
+  })
 
 @app.route("/register", methods=["POST"])
 def register():
