@@ -26,19 +26,14 @@
   </style>
 </head>
 <body>
-  <form
-    onsubmit="sendData(event)"
-    action="http://127.0.0.1:5000/" 
-    method="POST" 
-    class="form"
-  >
+  <div class="form">
     <label for="name">Name:</label>
     <input type="text" name="name" id="name">
     <label for="password">Password:</label>
     <input type="text" name="password" id="password">
-    <input type="submit" value="Submit">
-  </form>
+    <input type="submit" value="Submit" id="submit">
+  </div>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
