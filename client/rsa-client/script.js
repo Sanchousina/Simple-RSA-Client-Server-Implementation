@@ -1,22 +1,27 @@
 import rsa from 'js-crypto-rsa';
+import base64url from 'base64url'
 
 //let publicKey = {kty: 'RSA'};
 
 const submitBtn = document.getElementById('submit');
 submitBtn.addEventListener('click', sendData);
 
-let publicKey = {};
-let privateKey = {};
+// let publicKey = {};
+// let privateKey = {};
+let decodedN = 0n;
+let decodedE = 0n;
 
 async function getKey() {
   try {
     const res = await axios.get('http://127.0.0.1:5000/publicKey');
 
-    // publicKey.n = res.data.publicKeyN;
-    // publicKey.e = res.data.publicKeyE;
-
-    publicKey = JSON.parse(res.data.publicKey);
-    privateKey = JSON.parse(res.data.privateKey);
+    let publicKey = JSON.parse(res.data.publicKey);
+    
+    decodedN = base64ToBigInt(publicKey.n);
+    decodedE = base64ToBigInt(publicKey.e);
+    
+    console.log("Decoded n (BigInt): ", decodedN);
+    console.log("Decoded e (BigInt): ", decodedE);
 
   } catch (err) {
     console.log(err)
@@ -89,6 +94,19 @@ function encodeMessage(msg, publicKey) {
 //   });
 // }
 
+function base64ToBigInt(str) {
+  let base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
+
+  // Pad the string with '=' until it is a multiple of 4
+  while (base64Encoded.length % 4) {
+    base64Encoded += '=';
+  }
+
+  // Decode the base64 string and convert to BigInt
+  let decoded = BigInt('0x' + Array.from(atob(base64Encoded), (c) => c.charCodeAt(0)).map((b) => b.toString(16).padStart(2, '0')).join(''));
+  return decoded;
+}
+
 function textToByteArray(str) {
   const utf8EncodeText = new TextEncoder();
   const byteArray = utf8EncodeText.encode(str); // Uint8Array
@@ -103,6 +121,5 @@ function byteArrayToText(arr) {
 
 await getKey();
 
-console.log('Public key: ', publicKey);
 
 

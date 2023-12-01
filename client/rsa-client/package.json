@@ -12,6 +12,7 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
+    "base64url": "^3.0.1",
     "js-crypto-rsa": "^1.0.7"
   }
 }
