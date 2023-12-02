@@ -17,8 +17,8 @@ async function getKey() {
 
     let publicKey = JSON.parse(res.data.publicKey);
     
-    decodedN = base64ToBigInt(publicKey.n);
-    decodedE = base64ToBigInt(publicKey.e);
+    decodedN = base64ToBigInt(publicKey.n).value;
+    decodedE = base64ToBigInt(publicKey.e).value;
     
     console.log("Decoded n (BigInt): ", decodedN);
     console.log("Decoded e (BigInt): ", decodedE);
@@ -37,14 +37,12 @@ async function sendData(e) {
   if (name.value == "" || password.value == "") {
     alert("Ensure you input a value in both fields!");
   } else {
-    console.log(
-      `This form has a name of ${name.value} and password of ${password.value}`
-    );
 
-    const encodedName = await encodeMessage(textToByteArray(name.value), publicKey);
-    const encodedPassword = await encodeMessage(textToByteArray(password.value), publicKey)
+    const encodedName = encryptMessage(name.value, decodedN, decodedE);
+    const encodedPassword = encryptMessage(password.value, decodedN, decodedE);
 
-    // console.log(encodedName);
+    console.log(encodedName);
+    console.log(encodedPassword);
 
     let data = JSON.stringify({
       name: encodedName,
@@ -63,36 +61,20 @@ async function sendData(e) {
   }
 }
 
-function encodeMessage(msg, publicKey) {
-  return new Promise((resolve, reject) => {
-    rsa.encrypt(msg, publicKey)
-      .then((encrypted) => {
-        resolve(encrypted);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
+function encryptMessage(str, decodedN, decodedE) {
+  let byteArray = textToByteArray(str);
+  let encryptedBytesArr = []
 
-// function encodeMessage(msg, publicKey) {
-//   return new Promise((resolve, reject) => {
-//     rsa.encrypt(msg, publicKey)
-//       .then((encrypted) => {
-//         return rsa.decrypt(
-//           encrypted,
-//           privateKey,
-//         )
-//       }).then( (decrypted) => {
-//         // now you get the decrypted message
-//         console.log(byteArrayToText(decrypted));   // -> correct
-//         resolve(decrypted);
-//       })
-//       .catch((error) => {
-//         reject(error);
-//       });
-//   });
-// }
+  byteArray.forEach(charCode => {
+    let charBigInt = bigInt(charCode);
+    let encryptedBigInt = charBigInt.modPow(decodedE, decodedN).toString();
+    let encryptedString = String(encryptedBigInt);
+    
+    encryptedBytesArr.push(encryptedString);
+  });
+
+  return encryptedBytesArr;
+}
 
 function base64ToBigInt(str) {
   let base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -104,7 +86,7 @@ function base64ToBigInt(str) {
 
   // Decode the base64 string and convert to BigInt
   let decoded = BigInt('0x' + Array.from(atob(base64Encoded), (c) => c.charCodeAt(0)).map((b) => b.toString(16).padStart(2, '0')).join(''));
-  return decoded;
+  return bigInt(decoded);
 }
 
 function textToByteArray(str) {
