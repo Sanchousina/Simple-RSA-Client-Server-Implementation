@@ -1,13 +1,6 @@
-import rsa from 'js-crypto-rsa';
-import base64url from 'base64url'
-
-//let publicKey = {kty: 'RSA'};
-
 const submitBtn = document.getElementById('submit');
 submitBtn.addEventListener('click', sendData);
 
-// let publicKey = {};
-// let privateKey = {};
 let decodedN = 0n;
 let decodedE = 0n;
 
@@ -19,9 +12,6 @@ async function getKey() {
     
     decodedN = base64ToBigInt(publicKey.n).value;
     decodedE = base64ToBigInt(publicKey.e).value;
-    
-    console.log("Decoded n (BigInt): ", decodedN);
-    console.log("Decoded e (BigInt): ", decodedE);
 
   } catch (err) {
     console.log(err)
@@ -41,15 +31,10 @@ async function sendData(e) {
     const encodedName = encryptMessage(name.value, decodedN, decodedE);
     const encodedPassword = encryptMessage(password.value, decodedN, decodedE);
 
-    console.log(encodedName);
-    console.log(encodedPassword);
-
     let data = JSON.stringify({
       name: encodedName,
       password: encodedPassword
     });
-
-    console.log("DATA: ", data);
 
     axios.post('http://127.0.0.1:5000/register', data,
       {
