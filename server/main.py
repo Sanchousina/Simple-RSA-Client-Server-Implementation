@@ -16,19 +16,11 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 public_key = 0
 private_key = 0
+n_decoded = 0
+d_decoded = 0
 
 @app.route("/publicKey")
 def generateKeys():
-  # (pubkey, privkey) = rsa.newkeys(512)
-  # n = pubkey.n
-  # e = pubkey.e
-  # d = privkey.d
-  # print(pubkey.n)
- 
-  # return jsonify({
-  #   "publicKeyN": str(pubkey.n),
-  #   "publicKeyE" : str(e)
-  # })
   global public_key
   global private_key
 
@@ -36,20 +28,8 @@ def generateKeys():
   public_key = key.export_public()
   private_key = key.export_private()
 
-  # private_key_dict = json.loads(private_key)
-
-  # e_decoded = int.from_bytes(base64.urlsafe_b64decode(private_key_dict['e'] + '=='), byteorder='big')
-  # n_decoded = int.from_bytes(base64.urlsafe_b64decode(private_key_dict['n'] + '=='), byteorder='big')
-  # d_decoded = int.from_bytes(base64.urlsafe_b64decode(private_key_dict['d'] + '=='), byteorder='big')
-
-  # # Now you have e, n, and d as integers and can use them for decryption calculations
-  # print(f"Decoded e: {e_decoded}")
-  # print(f"Decoded n: {n_decoded}")
-  # print(f"Decoded d: {d_decoded}")
-
   return jsonify({
-    "publicKey": public_key,
-    "privateKey": private_key
+    "publicKey": public_key
   })
 
 @app.route("/register", methods=["POST"])
@@ -60,12 +40,10 @@ def register():
   decrypted_password = decrypt_message(data['password'])
   print('Decrypted name, password: ', decrypted_name, decrypted_password)
 
-  return jsonify(data), 201
+  return jsonify({"name": decrypted_name}), 201
 
 def decrypt_message(msg):
-  private_key_dict = json.loads(private_key)
-  n_decoded = int.from_bytes(base64.urlsafe_b64decode(private_key_dict['n'] + '=='), byteorder='big')
-  d_decoded = int.from_bytes(base64.urlsafe_b64decode(private_key_dict['d'] + '=='), byteorder='big')
+  decode_keys()
 
   decrypted_message_bytes = [
     long_to_bytes(pow(int(value), d_decoded, n_decoded))
@@ -80,6 +58,15 @@ def decrypt_message(msg):
     print("Decoding as UTF-8 failed:", e)
 
   return decrypted_text
+
+def decode_keys():
+  global private_key
+  global n_decoded
+  global d_decoded
+
+  private_key_dict = json.loads(private_key)
+  n_decoded = int.from_bytes(base64.urlsafe_b64decode(private_key_dict['n'] + '=='), byteorder='big')
+  d_decoded = int.from_bytes(base64.urlsafe_b64decode(private_key_dict['d'] + '=='), byteorder='big')
 
 if __name__ == "__main__":
   app.run(debug=True)
