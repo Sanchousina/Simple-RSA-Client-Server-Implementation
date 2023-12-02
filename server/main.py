@@ -10,10 +10,6 @@ from Crypto.Util.number import long_to_bytes, bytes_to_long
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
-# n = 0
-# e = 0
-# d = 0
-
 public_key = 0
 private_key = 0
 n_decoded = 0
