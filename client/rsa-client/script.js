@@ -5,9 +5,13 @@ submitBtn.addEventListener('click', sendData);
 
 let decodedN = 0n;
 let decodedE = 0n;
-let clientDecodedN = 0n;
-let clientDecodedD = 0n;
+
 const { clientPublicKey, clientPrivateKey } = await generateKeys();
+let clientDecodedN = base64ToBigInt(clientPrivateKey['n']);
+let clientDecodedD = base64ToBigInt(clientPrivateKey['d']);
+
+console.log('Client decoded n: ', clientDecodedN);
+console.log('Client decoded d: ', clientDecodedD);
 
 async function getKey() {
   try {
