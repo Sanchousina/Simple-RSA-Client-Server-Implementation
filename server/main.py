@@ -51,7 +51,7 @@ def register():
 
   data = jsonify({
     "name": encrypt_message(decrypted_name, client_e_decoded, client_n_decoded),
-    "encrypted": encrypt_message("on server with client public key", client_e_decoded, client_n_decoded)
+    "info": encrypt_message("Encrypted on server with client public key", client_e_decoded, client_n_decoded)
   })
 
   return data, 201

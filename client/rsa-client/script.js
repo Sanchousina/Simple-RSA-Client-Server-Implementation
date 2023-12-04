@@ -7,11 +7,8 @@ let decodedN = 0n;
 let decodedE = 0n;
 
 const { clientPublicKey, clientPrivateKey } = await generateKeys();
-let clientDecodedN = base64ToBigInt(clientPrivateKey['n']);
-let clientDecodedD = base64ToBigInt(clientPrivateKey['d']);
-
-console.log('Client decoded n: ', clientDecodedN);
-console.log('Client decoded d: ', clientDecodedD);
+let clientDecodedN = base64ToBigInt(clientPrivateKey['n']).value;
+let clientDecodedD = base64ToBigInt(clientPrivateKey['d']).value;
 
 async function getKey() {
   try {
@@ -52,7 +49,11 @@ async function sendData(e) {
             'Content-Type': 'application/json',
         }
       })
-      .then(response => console.log(response));
+      .then(response => {
+        console.log(response);
+        console.log("Decrypted name: ", decryptMessage(response.data.name, clientDecodedN, clientDecodedD));
+        console.log("Decrypted info: ", decryptMessage(response.data.info, clientDecodedN, clientDecodedD));
+      });
   }
 }
 
@@ -69,6 +70,20 @@ function encryptMessage(str, decodedN, decodedE) {
   });
 
   return encryptedBytesArr;
+}
+
+function decryptMessage(encryptedArr, decodedN, decodedD) {
+  let decryptedBytesArr = [];
+
+  encryptedArr.forEach(value => {
+    let valueBigInt = bigInt(value);
+    let decryptedBigInt = valueBigInt.modPow(decodedD, decodedN).value;
+
+    decryptedBytesArr.push(Number(decryptedBigInt));
+  });
+  
+  let decryptedMessage = byteArrayToText(decryptedBytesArr);
+  return decryptedMessage;
 }
 
 function base64ToBigInt(str) {
@@ -91,8 +106,9 @@ function textToByteArray(str) {
 }
 
 function byteArrayToText(arr) {
+  let uint8Array = new Uint8Array(arr);
   let decoder = new TextDecoder("utf-8"); 
-  let str = decoder.decode(arr); 
+  let str = decoder.decode(uint8Array); 
   return str;
 }
 
