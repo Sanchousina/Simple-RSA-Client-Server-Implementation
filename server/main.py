@@ -13,8 +13,8 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 n_decoded = 0
 d_decoded = 0
 
-client_n_decoded = 0
-client_e_decoded = 0
+# client_n_decoded = 0
+# client_e_decoded = 0
 
 @app.route("/publicKey")
 def generateKeys():
@@ -34,8 +34,8 @@ def generateKeys():
 
 @app.route("/register", methods=["POST"])
 def register():
-  global client_n_decoded
-  global client_e_decoded
+  # global client_n_decoded
+  # global client_e_decoded
 
   data = request.get_json()
 
@@ -49,7 +49,12 @@ def register():
   decrypted_password = decrypt_message(data['password'])
   print('Decrypted name, password: ', decrypted_name, decrypted_password)
 
-  return jsonify({"name": decrypted_name}), 201
+  data = jsonify({
+    "name": encrypt_message(decrypted_name, client_e_decoded, client_n_decoded),
+    "encrypted": encrypt_message("on server with client public key", client_e_decoded, client_n_decoded)
+  })
+
+  return data, 201
 
 def decrypt_message(msg):
 
@@ -66,9 +71,17 @@ def decrypt_message(msg):
 
   return decrypted_text
 
+def encrypt_message(message, e, n):
+  byte_array = text_to_bytes(message)
+  encrypted_bytes = [str(pow(byte, e, n)) for byte in byte_array]
+  return encrypted_bytes
+
 def decode_keys(key):
   key_decoded = int.from_bytes(base64.urlsafe_b64decode(key + '=='), byteorder='big')
   return key_decoded
+
+def text_to_bytes(text):
+  return text.encode('utf-8')
 
 if __name__ == "__main__":
   app.run(debug=True)
