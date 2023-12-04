@@ -10,18 +10,14 @@ from Crypto.Util.number import long_to_bytes, bytes_to_long
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
-public_key = 0
-private_key = 0
 n_decoded = 0
 d_decoded = 0
-client_public_key = 0
+
 client_n_decoded = 0
 client_e_decoded = 0
 
 @app.route("/publicKey")
 def generateKeys():
-  global public_key
-  global private_key
   global n_decoded
   global d_decoded
 
@@ -38,12 +34,19 @@ def generateKeys():
 
 @app.route("/register", methods=["POST"])
 def register():
+  global client_n_decoded
+  global client_e_decoded
+
   data = request.get_json()
 
   client_public_key = data['clientPublicKey']
+  client_e_decoded = decode_keys(client_public_key['e'])
+  client_n_decoded = decode_keys(client_public_key['n'])
+  print('Client Public Key n: ', client_n_decoded)
+  print('Client Public Key e: ', client_e_decoded)
+
   decrypted_name = decrypt_message(data['name'])
   decrypted_password = decrypt_message(data['password'])
-  print('Client Public Key: ', client_public_key)
   print('Decrypted name, password: ', decrypted_name, decrypted_password)
 
   return jsonify({"name": decrypted_name}), 201
