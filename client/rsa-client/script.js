@@ -1,8 +1,13 @@
+import rsa from 'js-crypto-rsa';
+
 const submitBtn = document.getElementById('submit');
 submitBtn.addEventListener('click', sendData);
 
 let decodedN = 0n;
 let decodedE = 0n;
+let clientDecodedN = 0n;
+let clientDecodedD = 0n;
+const { clientPublicKey, clientPrivateKey } = await generateKeys();
 
 async function getKey() {
   try {
@@ -33,7 +38,8 @@ async function sendData(e) {
 
     let data = JSON.stringify({
       name: encodedName,
-      password: encodedPassword
+      password: encodedPassword,
+      clientPublicKey: clientPublicKey
     });
 
     axios.post('http://127.0.0.1:5000/register', data,
@@ -86,7 +92,17 @@ function byteArrayToText(arr) {
   return str;
 }
 
+async function generateKeys() {
+  let publicKey = 0, privateKey = 0;
+  await rsa.generateKey(2048).then( (key) => {
+    publicKey = key.publicKey;
+    privateKey = key.privateKey;
+  })
+
+  return {
+    clientPublicKey: publicKey, 
+    clientPrivateKey: privateKey
+  };
+}
+
 await getKey();
-
-
-
